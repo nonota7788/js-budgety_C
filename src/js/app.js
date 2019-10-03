@@ -63,7 +63,9 @@ var UIController = (function() {
     inputType: ".add__type",
     inputDiscription: ".add__description",
     inputValue: ".add__value",
-    inpuBtn: ".add__btn"
+    inpuBtn: ".add__btn",
+    incomeContainer: ".income__list",
+    expensesContainer: ".expenses__list"
   };
 
   return {
@@ -73,6 +75,25 @@ var UIController = (function() {
         description: document.querySelector(DOMstrings.inputDiscription).value,
         value: document.querySelector(DOMstrings.inputValue).value
       };
+    },
+    addListItem: function(obj, type) {
+      var html, element;
+
+      //Create HTML elmement based on 'inc' or 'exp'
+      if (type === "inc") {
+        element = DOMstrings.incomeContainer;
+        html = `<div class="item clearfix" id="income-${obj.id}"><div class="item__description">${obj.description}</div>
+        <div class="right clearfix"><div class="item__value">+ ${obj.value}</div>
+        <div class="item__delete"><button class="item__delete--btn"><i class="ion-ios-close-outline"></i></button></div></div></div>`;
+      } else if (type === "exp") {
+        element = DOMstrings.expensesContainer;
+        html = `<div class="item clearfix" id="expense-${obj.id}"><div class="item__description">${obj.description}</div>
+        <div class="right clearfix"><div class="item__value">- ${obj.value}</div>
+        <div class="item__percentage">21%</div><div class="item__delete"><button class="item__delete--btn"><i class="ion-ios-close-outline"></i></button></div></div></div>`;
+      }
+
+      // Insert the html into the DOM
+      document.querySelector(element).insertAdjacentHTML("beforeend", html);
     },
     getDOMstrings: function() {
       return DOMstrings;
@@ -102,7 +123,10 @@ var controller = (function(budgetCtrl, UICtrl) {
 
     //2: Add the item to budget controller
     newItem = budgetCtrl.addItem(input.type, input.description, input.value);
+
     //3: Add new item to UI controller
+    UICtrl.addListItem(newItem, input.type);
+
     //4: Calculate budget
     //5: Display the budget on the UI
   };
