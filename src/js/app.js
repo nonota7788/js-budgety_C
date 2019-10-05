@@ -102,7 +102,8 @@ var UIController = (function() {
     budgetLabel: ".budget__value",
     totalIncLabel: ".budget__income--value",
     totalExpLabel: ".budget__expenses--value",
-    percentageLabel: ".budget__expenses--percentage"
+    percentageLabel: ".budget__expenses--percentage",
+    container: ".container"
   };
 
   return {
@@ -119,12 +120,12 @@ var UIController = (function() {
       //Create HTML elmement based on 'inc' or 'exp'
       if (type === "inc") {
         element = DOMstrings.incomeContainer;
-        html = `<div class="item clearfix" id="income-${obj.id}"><div class="item__description">${obj.description}</div>
+        html = `<div class="item clearfix" id="inc-${obj.id}"><div class="item__description">${obj.description}</div>
         <div class="right clearfix"><div class="item__value">+ ${obj.value}</div>
         <div class="item__delete"><button class="item__delete--btn"><i class="ion-ios-close-outline"></i></button></div></div></div>`;
       } else if (type === "exp") {
         element = DOMstrings.expensesContainer;
-        html = `<div class="item clearfix" id="expense-${obj.id}"><div class="item__description">${obj.description}</div>
+        html = `<div class="item clearfix" id="exp-${obj.id}"><div class="item__description">${obj.description}</div>
         <div class="right clearfix"><div class="item__value">- ${obj.value}</div>
         <div class="item__percentage">21%</div><div class="item__delete"><button class="item__delete--btn"><i class="ion-ios-close-outline"></i></button></div></div></div>`;
       }
@@ -177,6 +178,9 @@ var controller = (function(budgetCtrl, UICtrl) {
         ctrlAddItem();
       }
     });
+    document
+      .querySelector(DOM.container)
+      .addEventListener("click", ctrlDeleteItem);
   };
 
   var upadteBudget = function() {
@@ -207,6 +211,28 @@ var controller = (function(budgetCtrl, UICtrl) {
 
       //5: Calculate and update budget
       upadteBudget();
+    }
+  };
+
+  var findParent = function(el, className) {
+    while ((el = el.parentElement) && !el.classList.contains(className));
+    return el;
+  };
+
+  var ctrlDeleteItem = function(event) {
+    var itemDelete, itemID, splitId, type, ID;
+
+    itemDelete = findParent(event.target, "item__delete");
+    if (itemDelete) {
+      itemID = itemDelete.parentNode.parentNode.id;
+      splitId = itemID.split("-");
+      type = splitId[0];
+      ID = parseInt(splitId[1]);
+
+      //1: Delete  the item from data structure (data.allItem.inc or exp)
+      //2: Delete the item from the UI
+      //3: Recalculate the budget
+      //4: Update the UI
     }
   };
 
