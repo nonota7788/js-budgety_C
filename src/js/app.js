@@ -145,7 +145,24 @@ var UIController = (function() {
     totalExpLabel: ".budget__expenses--value",
     percentageLabel: ".budget__expenses--percentage",
     container: ".container",
-    itemPercLabel: ".item__percentage"
+    itemPercLabel: ".item__percentage",
+    dateLabel: ".budget__title--month"
+  };
+
+  var formatNumber = function(num, type) {
+    var numSplit, int, dec;
+
+    num = Math.abs(num);
+    num = num.toFixed(2);
+
+    numSplit = num.split(".");
+
+    int = parseInt(numSplit[0]);
+    int = int.toLocaleString("en-US");
+
+    dec = numSplit[1];
+
+    return `${type === "exp" ? "-" : "+"} ${int}.${dec}`;
   };
 
   var nodeListForEach = function(list, callback) {
@@ -163,18 +180,20 @@ var UIController = (function() {
       };
     },
     addListItem: function(obj, type) {
-      var html, element;
+      var html, element, value;
 
       //Create HTML elmement based on 'inc' or 'exp'
       if (type === "inc") {
         element = DOMstrings.incomeContainer;
+        value = formatNumber(obj.value, type);
         html = `<div class="item clearfix" id="inc-${obj.id}"><div class="item__description">${obj.description}</div>
-        <div class="right clearfix"><div class="item__value">+ ${obj.value}</div>
+        <div class="right clearfix"><div class="item__value">${value}</div>
         <div class="item__delete"><button class="item__delete--btn"><i class="ion-ios-close-outline"></i></button></div></div></div>`;
       } else if (type === "exp") {
         element = DOMstrings.expensesContainer;
+        value = formatNumber(obj.value, type);
         html = `<div class="item clearfix" id="exp-${obj.id}"><div class="item__description">${obj.description}</div>
-        <div class="right clearfix"><div class="item__value">- ${obj.value}</div>
+        <div class="right clearfix"><div class="item__value">${value}</div>
         <div class="item__percentage">21%</div><div class="item__delete"><button class="item__delete--btn"><i class="ion-ios-close-outline"></i></button></div></div></div>`;
       }
 
@@ -198,11 +217,19 @@ var UIController = (function() {
       fieldsArr[0].focus();
     },
     displayBudget: function(obj) {
-      document.querySelector(DOMstrings.budgetLabel).textContent = obj.budget;
-      document.querySelector(DOMstrings.totalIncLabel).textContent =
-        obj.totalInc;
-      document.querySelector(DOMstrings.totalExpLabel).textContent =
-        obj.totalExp;
+      var type;
+      obj.budget > 0 ? (type = "inc") : (type = "exp");
+
+      document.querySelector(DOMstrings.budgetLabel).textContent = formatNumber(
+        obj.budget,
+        type
+      );
+      document.querySelector(
+        DOMstrings.totalIncLabel
+      ).textContent = formatNumber(obj.totalInc, "inc");
+      document.querySelector(
+        DOMstrings.totalExpLabel
+      ).textContent = formatNumber(obj.totalExp, "exp");
 
       if (obj.percentage !== -1) {
         document.querySelector(
@@ -223,6 +250,24 @@ var UIController = (function() {
         }
       });
     },
+    displayMonth: function() {
+      var date = new Date().toLocaleString("en-US", {
+        month: "long",
+        year: "numeric"
+      });
+      document.querySelector(DOMstrings.dateLabel).textContent = date;
+    },
+    changeInputFocus: function() {
+      var nodeList;
+      nodeList = document.querySelectorAll(
+        `${DOMstrings.inputType}, ${DOMstrings.inputDiscription}, ${DOMstrings.inputValue}`
+      );
+      nodeListForEach(nodeList, function(cur) {
+        cur.classList.toggle("red-focus");
+      });
+      document.querySelector(DOMstrings.inpuBtn).classList.toggle("red");
+    },
+
     getDOMstrings: function() {
       return DOMstrings;
     }
@@ -245,6 +290,9 @@ var controller = (function(budgetCtrl, UICtrl) {
     document
       .querySelector(DOM.container)
       .addEventListener("click", ctrlDeleteItem);
+    document
+      .querySelector(DOM.inputType)
+      .addEventListener("change", UICtrl.changeInputFocus);
   };
 
   var upadteBudget = function() {
@@ -325,6 +373,7 @@ var controller = (function(budgetCtrl, UICtrl) {
   return {
     init: function() {
       console.log("application has started!!");
+      UICtrl.displayMonth();
       UICtrl.displayBudget({
         totalInc: 0,
         totalExp: 0,
